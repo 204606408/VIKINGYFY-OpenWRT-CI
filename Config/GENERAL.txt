@@ -1,55 +1,57 @@
-
 # ====================== 一、全局编译 & 基础系统设置 ======================
-CONFIG_DEVEL=y
-CONFIG_TARGET_OPTIONS=y
+CONFIG_DEVEL=y                          # 开发者模式 - 显示更多编译选项
+CONFIG_TARGET_OPTIONS=y                 # 目标平台选项 - 启用目标平台选项配置
 CONFIG_TARGET_OPTIMIZATION="-O3 -pipe -march=armv8-a+crypto+crc -mcpu=cortex-a53+crypto+crc -mtune=cortex-a53"
-CONFIG_CCACHE=y
-CONFIG_PACKAGE_default-settings=y
-CONFIG_PACKAGE_default-settings-chn=y
-CONFIG_TARGET_MULTI_PROFILE=y
-CONFIG_TARGET_PER_DEVICE_ROOTFS=y
-CONFIG_STRIP_KERNEL=y
-CONFIG_STRIP_MODULES=y
+                                        # ARM架构优化 - O3、pipe加速、Cortex-A53专用
+CONFIG_CCACHE=y                         # 编译缓存 - 二次编译大幅加速
+CONFIG_PACKAGE_default-settings=y       # 系统默认配置 - 保证基础功能正常
+CONFIG_PACKAGE_default-settings-chn=y   # 国内优化 - 时区、软件源适配国内环境
+CONFIG_TARGET_MULTI_PROFILE=y           # 多设备兼容 - 固件适配性更强
+CONFIG_TARGET_PER_DEVICE_ROOTFS=y       # 独立rootfs - 每设备生成独立根文件系统
+CONFIG_STRIP_KERNEL=y                   # 精简内核 - 缩小固件体积
+CONFIG_STRIP_MODULES=y                  # 精简模块 - 减小固件占用
 
-CONFIG_FEED_video=n
-CONFIG_LUCI_LANG_zh_Hant=n
-CONFIG_LUCI_LANG_en=n
+# 语言 & 无用feed禁用
+CONFIG_FEED_video=n                     # 视频插件源 - 家用无需求
+CONFIG_LUCI_LANG_zh_Hant=n              # 繁体中文 - 仅使用简体
+CONFIG_LUCI_LANG_en=n                   # 英文语言包 - 无使用需求
 
-CONFIG_FEED_nss_packages=n
-CONFIG_FEED_sqm_scripts_nss=n
-CONFIG_TARGET_ROOTFS_INITRAMFS=n
+# 禁用项
+CONFIG_FEED_nss_packages=n              # NSS软件包源 - 关闭
+CONFIG_FEED_sqm_scripts_nss=n           # SQM NSS脚本源 - 关闭
+CONFIG_TARGET_ROOTFS_INITRAMFS=n        # initramfs镜像 - 不生成，减少体积
 
 # ====================== 二、内核模块 ======================
+## 2.1 ZRAM 内存压缩
+CONFIG_PACKAGE_zram-swap=y              # ZRAM内存压缩 - 虚拟内存扩容，防溢出
+CONFIG_PACKAGE_kmod-lib-lz4=y           # LZ4压缩算法 - 速度快占用低
+CONFIG_KERNEL_ZRAM_BACKEND_LZ4=y        # ZRAM后端LZ4 - 使用LZ4压缩
+CONFIG_KERNEL_ZRAM_BACKEND_LZO=n        # ZRAM后端LZO - 性能弱于LZ4，关闭
+CONFIG_KERNEL_ZRAM_DEF_COMP_LZ4=y       # ZRAM默认LZ4 - 默认使用LZ4压缩
+CONFIG_KERNEL_ZRAM_WRITEBACK=n          # ZRAM回写 - 回写硬盘损寿命，关闭
 
-# 2.1 ZRAM 内存压缩
-CONFIG_PACKAGE_zram-swap=y
-CONFIG_PACKAGE_kmod-lib-lz4=y
-CONFIG_KERNEL_ZRAM_BACKEND_LZ4=y
-CONFIG_KERNEL_ZRAM_BACKEND_LZO=n
-CONFIG_KERNEL_ZRAM_DEF_COMP_LZ4=y
-CONFIG_KERNEL_ZRAM_WRITEBACK=n
+## 2.2 USB 驱动（核心控制器）
+CONFIG_PACKAGE_kmod-usb-core=y          # USB核心驱动 - 所有USB设备依赖
+CONFIG_PACKAGE_kmod-usb2=y              # USB 2.0控制器 - USB2.0设备支持
+CONFIG_PACKAGE_kmod-usb3=y              # USB 3.0驱动 - 高速USB设备支持
+CONFIG_PACKAGE_kmod-usb-dwc3=y          # DWC3控制器 - IPQ60xx专用USB3.0
+CONFIG_PACKAGE_kmod-usb-ohci=y          # OHCI驱动 - USB1.1兼容兜底
+CONFIG_PACKAGE_kmod-usb-uhci=y          # UHCI驱动 - USB1.1兼容完善
+CONFIG_PACKAGE_kmod-usb-ehci=y          # EHCI驱动 - USB 2.0高速
+CONFIG_PACKAGE_kmod-usb-xhci=y          # XHCI驱动 - USB3.0主控，高速设备必备
+CONFIG_PACKAGE_kmod-usb-audio=n         # USB声卡 - 无音频设备，关闭
 
-# 2.2 USB 驱动（核心控制器）
-CONFIG_PACKAGE_kmod-usb-core=y
-CONFIG_PACKAGE_kmod-usb2=y
-CONFIG_PACKAGE_kmod-usb3=y
-CONFIG_PACKAGE_kmod-usb-dwc3=y
-CONFIG_PACKAGE_kmod-usb-ohci=y
-CONFIG_PACKAGE_kmod-usb-uhci=y
-CONFIG_PACKAGE_kmod-usb-ehci=y
-CONFIG_PACKAGE_kmod-usb-xhci=y
-CONFIG_PACKAGE_kmod-usb-audio=n
+## 2.3 USB 网卡驱动
+CONFIG_PACKAGE_kmod-usb-net=y           # USB网络核心 - 所有USB网卡依赖
+CONFIG_PACKAGE_kmod-usb-net-asix=y      # ASIX网卡驱动 - 兼容AX88179等2.5G网卡
+CONFIG_PACKAGE_kmod-usb-net-asix-ax88179=y  # AX88179驱动 - 2.5G USB网卡
+CONFIG_PACKAGE_kmod-usb-net-cdc-ether=y # CDC以太网 - 通用免驱/安卓USB共享
+CONFIG_PACKAGE_kmod-usb-net-ipheth=y    # iPhone共享 - iPhone USB共享网络
+CONFIG_PACKAGE_kmod-usb-net-rndis=y     # RNDIS - 安卓USB共享网络
+CONFIG_PACKAGE_kmod-usb-net-rtl8150=y   # RTL8150 - 老款百兆USB网卡兼容
+CONFIG_PACKAGE_kmod-usb-net-rtl8152=y   # RTL8152/8153 - 千兆/2.5G网卡
 
-# 2.3 USB 网卡驱动
-CONFIG_PACKAGE_kmod-usb-net=y
-CONFIG_PACKAGE_kmod-usb-net-asix=y
-CONFIG_PACKAGE_kmod-usb-net-asix-ax88179=y
-CONFIG_PACKAGE_kmod-usb-net-cdc-ether=y
-CONFIG_PACKAGE_kmod-usb-net-ipheth=y
-CONFIG_PACKAGE_kmod-usb-net-rndis=y
-CONFIG_PACKAGE_kmod-usb-net-rtl8150=y
-CONFIG_PACKAGE_kmod-usb-net-rtl8152=y
-
+# 4G/5G模块（家用无需求，全部关闭）
 CONFIG_PACKAGE_kmod-usb-net-cdc-eem=n
 CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=n
 CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=n
@@ -60,226 +62,226 @@ CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-fibocom=n
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-quectel=n
 CONFIG_PACKAGE_kmod-usb-net-sierrawireless=n
 
-# 2.4 USB 存储驱动
-CONFIG_PACKAGE_kmod-usb-storage=y
-CONFIG_PACKAGE_kmod-usb-storage-uas=y
-CONFIG_PACKAGE_kmod-usb-storage-extras=n
+## 2.4 USB 存储驱动
+CONFIG_PACKAGE_kmod-usb-storage=y       # USB存储核心 - 识别U盘/移动硬盘
+CONFIG_PACKAGE_kmod-usb-storage-uas=y   # UAS高速协议 - 提升固态读写性能
+CONFIG_PACKAGE_kmod-usb-storage-extras=n # 老旧读卡器驱动 - 家用无用，关闭
 
-# 2.5 网络核心 & nftables 防火墙
-CONFIG_PACKAGE_kmod-dsa=y
-CONFIG_PACKAGE_kmod-dummy=y
-CONFIG_PACKAGE_kmod-veth=y
-CONFIG_PACKAGE_kmod-tun=y
-CONFIG_PACKAGE_kmod-inet-diag=y
-CONFIG_PACKAGE_kmod-bonding=n
-CONFIG_PACKAGE_kmod-inet-mptcp-diag=n
-CONFIG_PACKAGE_kmod-netlink-diag=n
-CONFIG_PACKAGE_kmod-nf-nat6=n
-CONFIG_PACKAGE_kmod-wireguard=n
+## 2.5 网络核心 & nftables 防火墙
+# 基础网络
+CONFIG_PACKAGE_kmod-dsa=y               # DSA交换机驱动 - IPQ60xx自带交换机芯片
+CONFIG_PACKAGE_kmod-dummy=y             # 虚拟哑网卡 - 部分插件依赖
+CONFIG_PACKAGE_kmod-veth=y              # 虚拟以太网 - Docker/代理插件依赖
+CONFIG_PACKAGE_kmod-tun=y               # TUN虚拟网卡 - 代理/VPN必备
+CONFIG_PACKAGE_kmod-inet-diag=y         # 网络诊断 - 排查网络故障
+CONFIG_PACKAGE_kmod-bonding=n           # 链路聚合 - 家用单WAN无需求，关闭
+CONFIG_PACKAGE_kmod-inet-mptcp-diag=n   # MPTCP调试 - 家用无用，关闭
+CONFIG_PACKAGE_kmod-netlink-diag=n      # Netlink调试 - 普通用户无用，关闭
+CONFIG_PACKAGE_kmod-nf-nat6=n           # IPv6 NAT - 不折腾IPv6转发，关闭
+CONFIG_PACKAGE_kmod-wireguard=n         # WireGuard VPN - 与ZeroTier二选一，关闭
 
-CONFIG_PACKAGE_kmod-nft-core=y
-CONFIG_PACKAGE_kmod-nft-nat=y
-CONFIG_PACKAGE_kmod-nft-fullcone=y
-CONFIG_PACKAGE_kmod-nft-tproxy=y
-CONFIG_PACKAGE_kmod-nft-bridge=y
-CONFIG_PACKAGE_kmod-nft-connlimit=y
-CONFIG_PACKAGE_kmod-nft-arp=n
-CONFIG_PACKAGE_kmod-nft-dup-inet=n
-CONFIG_PACKAGE_kmod-nft-fib=n
-CONFIG_PACKAGE_kmod-nft-netdev=n
-CONFIG_PACKAGE_kmod-nft-offload=n
-CONFIG_PACKAGE_kmod-nft-queue=n
-CONFIG_PACKAGE_kmod-nft-socket=n
-CONFIG_PACKAGE_kmod-nft-xfrm=n
+# nftables 防火墙
+CONFIG_PACKAGE_kmod-nft-core=y          # nftables核心 - 所有规则依赖
+CONFIG_PACKAGE_kmod-nft-nat=y           # NAT转换 - 上网转发核心
+CONFIG_PACKAGE_kmod-nft-fullcone=y      # 全锥NAT - 游戏/P2P必备
+CONFIG_PACKAGE_kmod-nft-tproxy=y        # 透明代理 - HomeProxy核心依赖
+CONFIG_PACKAGE_kmod-nft-bridge=y        # 桥接过滤 - 多网口/AP必备
+CONFIG_PACKAGE_kmod-nft-connlimit=y     # 连接数限制 - 防恶意扫描攻击
+CONFIG_PACKAGE_kmod-nft-arp=n           # ARP表操作 - 企业级功能，关闭
+CONFIG_PACKAGE_kmod-nft-dup-inet=n      # 数据包复制 - 企业级调试，关闭
+CONFIG_PACKAGE_kmod-nft-fib=n           # 高级路由策略 - 家用无用，关闭
+CONFIG_PACKAGE_kmod-nft-netdev=n        # 设备层过滤 - 家用无用，关闭
+CONFIG_PACKAGE_kmod-nft-offload=n       # 硬件卸载 - 官方ImmortalWrt未完全集成IPQ60xx NSS支持，关闭
+CONFIG_PACKAGE_kmod-nft-queue=n         # 用户态调试 - 无需求，关闭
+CONFIG_PACKAGE_kmod-nft-socket=n        # 套接字匹配 - 高级策略，关闭
+CONFIG_PACKAGE_kmod-nft-xfrm=n          # IPsec VPN - 家用无用，关闭
 
-# 2.6 存储文件系统 & 其他内核模块
-CONFIG_PACKAGE_kmod-ata-core=y
-CONFIG_PACKAGE_kmod-ata-ahci=y
-CONFIG_PACKAGE_kmod-nvme=y
+## 2.6 存储文件系统 & 其他内核模块
+# 存储控制器
+CONFIG_PACKAGE_kmod-ata-core=y          # ATA核心驱动 - 硬盘识别基础
+CONFIG_PACKAGE_kmod-ata-ahci=y          # AHCI协议 - 兼容USB转SATA
+CONFIG_PACKAGE_kmod-nvme=y              # NVMe协议 - 支持USB-NVMe固态
 
-CONFIG_PACKAGE_kmod-fs-btrfs=y
-CONFIG_PACKAGE_kmod-fs-exfat=y
-CONFIG_PACKAGE_kmod-fs-ext4=y
-CONFIG_PACKAGE_kmod-fuse=y
-CONFIG_PACKAGE_kmod-fs-ksmbd=n
+# 文件系统
+CONFIG_PACKAGE_kmod-fs-btrfs=y          # Btrfs - 快照/容错，适配NAS
+CONFIG_PACKAGE_kmod-fs-exfat=y          # exFAT - Windows兼容移动硬盘
+CONFIG_PACKAGE_kmod-fs-ext4=y           # ext4 - Linux最常见文件系统，NAS/硬盘常用
+CONFIG_PACKAGE_kmod-fuse=y              # FUSE - exFAT等格式依赖
+CONFIG_PACKAGE_kmod-fs-ksmbd=n          # KSMBD - 内核级SMB服务器，与Samba4二选一，关闭
+CONFIG_PACKAGE_kmod-fs-ntfs3=y          # NTFS3 - Windows硬盘读写支持
+CONFIG_PACKAGE_kmod-fs-vfat=y           # FAT32 - 小U盘/SD卡常见格式
 
-CONFIG_PACKAGE_kmod-fs-ntfs3=y
-CONFIG_PACKAGE_kmod-fs-vfat=y
-
-CONFIG_PACKAGE_kmod-mtd-rw=y
-CONFIG_PACKAGE_kmod-sound-core=n
+# 其他
+CONFIG_PACKAGE_kmod-mtd-rw=y            # 闪存读写 - 备份固件必备
+CONFIG_PACKAGE_kmod-sound-core=n        # 音频核心 - 无音频设备，关闭
 
 # ====================== 三、系统基础工具 & 运行组件 ======================
+## 3.1 命令行工具
+CONFIG_PACKAGE_nano-full=y              # 文本编辑器 - SSH改配置必备
+CONFIG_PACKAGE_tmux=y                   # 终端复用器 - 类似screen更强大
+CONFIG_PACKAGE_htop=y                   # 进程监控 - 查看系统负载
+CONFIG_PACKAGE_iperf3=y                 # 网速测速 - 测试内网/USB网卡速度
+CONFIG_PACKAGE_dmesg=y                  # 内核日志 - 排查USB/网络故障
+CONFIG_PACKAGE_zoneinfo-asia=y          # 亚洲时区 - 系统时间同步
+CONFIG_PACKAGE_btop=n                   # 图形化资源监控 - 已有htop，关闭
+CONFIG_PACKAGE_tune2fs=n                # ext文件系统调整 - 无需求，关闭
+CONFIG_PACKAGE_ariang=n                 # Aria2 Web界面 - 无Aria2，关闭
+CONFIG_PACKAGE_fstrim=n                 # SSD TRIM - 无需求，关闭
+CONFIG_PACKAGE_hdparm=n                 # 硬盘参数工具 - 无需求，关闭
 
-# 3.1 命令行工具
-CONFIG_PACKAGE_nano-full=y
-CONFIG_PACKAGE_tmux=y
-CONFIG_PACKAGE_htop=y
-CONFIG_PACKAGE_iperf3=y
-CONFIG_PACKAGE_dmesg=y
-CONFIG_PACKAGE_zoneinfo-asia=y
-CONFIG_PACKAGE_btop=n
-CONFIG_PACKAGE_tune2fs=n
-CONFIG_PACKAGE_ariang=n
-CONFIG_PACKAGE_fstrim=n
-CONFIG_PACKAGE_hdparm=n
+## 3.2 网络命令 & 证书工具
+CONFIG_PACKAGE_curl=y                   # 网络请求 - 代理/插件依赖
+CONFIG_PACKAGE_ip-full=y                # 完整网络命令集 - 调试网络必备
+CONFIG_PACKAGE_openssh-keygen=y         # SSH密钥生成 - 提升远程安全
+CONFIG_PACKAGE_openssh-sftp-server=y    # SFTP文件传输 - NAS文件管理必备
+CONFIG_PACKAGE_openssl-util=y           # 加密工具 - 证书/代理依赖
+CONFIG_PACKAGE_acme-acmesh-dnsapi=n     # ACME DNS API - 无需求，关闭
+CONFIG_PACKAGE_ddns-scripts-cloudflare=n # CloudFlare DDNS - 已有ddns-go，关闭
 
-# 3.2 网络命令 & 证书工具
-CONFIG_PACKAGE_curl=y
-CONFIG_PACKAGE_ip-full=y
-CONFIG_PACKAGE_openssh-keygen=y
-CONFIG_PACKAGE_openssh-sftp-server=y
-CONFIG_PACKAGE_openssl-util=y
-CONFIG_PACKAGE_acme-acmesh-dnsapi=n
-CONFIG_PACKAGE_ddns-scripts-cloudflare=n
+## 3.3 USB & 硬件工具
+CONFIG_PACKAGE_usb-modeswitch=y         # USB模式切换 - 部分USB网卡识别必备
+CONFIG_PACKAGE_usbutils=y               # USB信息查看 - 排查USB设备故障
 
-# 3.3 USB & 硬件工具
-CONFIG_PACKAGE_usb-modeswitch=y
-CONFIG_PACKAGE_usbutils=y
+## 3.4 压缩 & 系统工具
+CONFIG_PACKAGE_xz-utils=y               # 压缩解压 - 固件备份/插件解压
+CONFIG_PACKAGE_blkid=y                  # 磁盘UUID识别 - 自动挂载依赖
 
-# 3.4 压缩 & 系统工具
-CONFIG_PACKAGE_xz-utils=y
-CONFIG_PACKAGE_blkid=y
+## 3.5 系统优化 & 诊断
+CONFIG_PACKAGE_autocore=y               # CPU调度优化 - 提升IPQ60xx性能
+CONFIG_PACKAGE_automount=y              # 硬盘自动挂载 - NAS核心功能
+CONFIG_PACKAGE_coremark=y               # CPU跑分 - 评估硬件性能
+CONFIG_PACKAGE_cpufreq=y                # CPU动态调频 - IPQ60xx必备
+CONFIG_PACKAGE_luci-app-cpufreq=y       # CPU频率调节(LuCI) - 网页端动态调整CPU频率以节能或提频
+CONFIG_PACKAGE_irqbalance=y             # IRQ中断负载均衡 - 优化多核CPU中断分配
+CONFIG_PACKAGE_luci-app-irqbalance=y    # LuCI界面 - IRQ中断均衡Web管理
 
-# 3.5 系统优化 & 诊断
-CONFIG_PACKAGE_autocore=y
-CONFIG_PACKAGE_automount=y
-CONFIG_PACKAGE_coremark=y
-CONFIG_PACKAGE_cpufreq=y
-CONFIG_PACKAGE_luci-app-cpufreq=y
-CONFIG_PACKAGE_irqbalance=y
-CONFIG_PACKAGE_luci-app-irqbalance=y
-
-# 3.6 LuCI 基础框架
-CONFIG_PACKAGE_luci-base=y
-CONFIG_PACKAGE_luci-compat=y
-CONFIG_PACKAGE_luci-lib-base=y
-CONFIG_PACKAGE_luci-lib-ipkg=y
-CONFIG_PACKAGE_luci-lua-runtime=y
-CONFIG_PACKAGE_luci-proto-relay=n
-CONFIG_PACKAGE_proto-bonding=n
+## 3.6 LuCI 基础框架
+CONFIG_PACKAGE_luci-base=y              # LuCI核心 - 网页后台基础
+CONFIG_PACKAGE_luci-compat=y            # LuCI兼容层 - 保证插件正常运行
+CONFIG_PACKAGE_luci-lib-base=y          # LuCI基础库 - 插件依赖
+CONFIG_PACKAGE_luci-lib-ipkg=y          # 软件包管理库 - 插件依赖
+CONFIG_PACKAGE_luci-lua-runtime=y       # Lua运行环境 - LuCI依赖
+CONFIG_PACKAGE_luci-proto-relay=n       # 中继协议 - 无线回程中继/扩展器场景需要，主路由/AP模式无需，关闭
+CONFIG_PACKAGE_proto-bonding=n          # 链路聚合 - 关闭
 
 # ====================== 四、磁盘管理工具套件 ======================
+## 4.1 分区工具
+CONFIG_PACKAGE_fdisk=y                  # MBR分区 - 基础分区必备
+CONFIG_PACKAGE_cfdisk=y                 # 图形化分区 - 硬盘初始化
+CONFIG_PACKAGE_gdisk=y                  # GPT分区 - 2T+大硬盘必备
+CONFIG_PACKAGE_sfdisk=y                 # 脚本化分区 - 自动挂载/初始化
+CONFIG_PACKAGE_cgdisk=n                 # 高级GPT分区 - 家用冗余，关闭
+CONFIG_PACKAGE_sgdisk=n                 # 高级GPT分区 - 冗余，关闭
 
-# 4.1 分区工具
-CONFIG_PACKAGE_fdisk=y
-CONFIG_PACKAGE_cfdisk=y
-CONFIG_PACKAGE_gdisk=y
-CONFIG_PACKAGE_sfdisk=y
-CONFIG_PACKAGE_cgdisk=n
-CONFIG_PACKAGE_sgdisk=n
+## 4.2 文件系统工具
+CONFIG_PACKAGE_exfat-fsck=y             # exFAT磁盘检查 - 固态/机械盘通用
+CONFIG_PACKAGE_exfat-mkfs=y             # exFAT格式化 - 移动硬盘主流格式
 
-# 4.2 文件系统工具
-CONFIG_PACKAGE_exfat-fsck=y
-CONFIG_PACKAGE_exfat-mkfs=y
+## 4.3 磁盘信息 & 健康监控
+CONFIG_PACKAGE_lsblk=y                  # 磁盘信息查看 - UUID获取/自动挂载
+CONFIG_PACKAGE_libnvme=y                # NVMe依赖库 - USB-NVMe固态必备
+CONFIG_PACKAGE_nvme-cli=y               # NVMe管理 - 健康温度寿命查看
+CONFIG_PACKAGE_smartmontools=y          # SMART监控 - 查坏道/看寿命，NAS必备
+CONFIG_PACKAGE_smartmontools-drivedb=y  # SMART数据库 - 识别硬盘型号精准监控
 
-# 4.3 磁盘信息 & 健康监控
-CONFIG_PACKAGE_lsblk=y
-CONFIG_PACKAGE_libnvme=y
-CONFIG_PACKAGE_nvme-cli=y
-CONFIG_PACKAGE_smartmontools=y
-CONFIG_PACKAGE_smartmontools-drivedb=y
+## 4.4 不需要的磁盘工具
+CONFIG_PACKAGE_mmc-utils=n              # eMMC工具 - 外接硬盘无用，关闭
+CONFIG_PACKAGE_nand-utils=n             # NAND工具 - 无用，关闭
 
-# 4.4 不需要的磁盘工具
-CONFIG_PACKAGE_mmc-utils=n
-CONFIG_PACKAGE_nand-utils=n
-
-# 4.5 苹果设备支持（不需要）
-CONFIG_PACKAGE_libimobiledevice=n
-CONFIG_PACKAGE_usbmuxd=n
+## 4.5 苹果设备支持（不需要）
+CONFIG_PACKAGE_libimobiledevice=n       # iPhone通信库 - 无苹果设备需求，关闭
+CONFIG_PACKAGE_usbmuxd=n                # iPhone管理服务 - 关闭
 
 # ====================== 五、LuCI 网页插件 ======================
+## 5.1 代理 & 科学上网
+CONFIG_PACKAGE_luci-app-homeproxy=y     # imm官方代理工具 - 基于sing-box的现代代理平台
+CONFIG_PACKAGE_luci-app-passwall2=n     # PassWall2代理 - PassWall精简版，备用代理方案
+CONFIG_PACKAGE_luci-app-openclash=n     # OpenClash代理 - 集成Clash内核的代理工具
+CONFIG_PACKAGE_luci-app-passwall=n      # PassWall代理 - 多协议代理工具
+CONFIG_PACKAGE_luci-app-nikki=n         # Nikki代理 - 代理工具
+CONFIG_PACKAGE_luci-app-momo=n          # Momo代理 - 代理工具
 
-# 5.1 代理 & 科学上网
-CONFIG_PACKAGE_luci-app-homeproxy=y
-CONFIG_PACKAGE_luci-app-passwall2=n
-CONFIG_PACKAGE_luci-app-openclash=n
-CONFIG_PACKAGE_luci-app-passwall=n
-CONFIG_PACKAGE_luci-app-nikki=n
-CONFIG_PACKAGE_luci-app-momo=n
+## 5.2 DNS & 域名解析
+CONFIG_PACKAGE_luci-app-mosdns=n        # MosDNS - DNS分流、缓存与优化工具，常与代理插件配合
+CONFIG_PACKAGE_luci-app-smartdns=n      # SmartDNS域名解析 - 智能DNS分流
+CONFIG_PACKAGE_luci-app-dnsfilter=n     # DNS广告过滤 - 轻量级DNS广告过滤
+CONFIG_PACKAGE_adguardhome=n            # AdGuardHome服务端 - DNS广告过滤服务
+CONFIG_PACKAGE_luci-app-adguardhome=n   # AdGuardHome面板 - AdGuardHome广告过滤管理界面
 
-# 5.2 DNS & 域名解析
-CONFIG_PACKAGE_luci-app-mosdns=n
-CONFIG_PACKAGE_luci-app-smartdns=n
-CONFIG_PACKAGE_luci-app-dnsfilter=n
-CONFIG_PACKAGE_adguardhome=n
-CONFIG_PACKAGE_luci-app-adguardhome=n
+## 5.3 DDNS & 动态域名
+CONFIG_PACKAGE_luci-app-ddns-go=y       # DDNS-Go动态域名 - 轻量、支持众多服务商的动态域名解析客户端
+CONFIG_PACKAGE_luci-app-ddns=n          # 动态DNS服务 - 集成花生壳、DynDNS等DDNS服务商，已使用ddns-go，关闭
+CONFIG_PACKAGE_luci-app-acme=n          # ACME证书工具 - 自动申请和更新Let's Encrypt SSL证书
 
-# 5.3 DDNS & 动态域名
-CONFIG_PACKAGE_luci-app-ddns-go=y
-CONFIG_PACKAGE_luci-app-ddns=n
-CONFIG_PACKAGE_luci-app-acme=n
+## 5.4 网络组网 & VPN
+CONFIG_PACKAGE_zerotier=y               # ZeroTier组网工具 - 创建虚拟局域网（SD-WAN）
+CONFIG_PACKAGE_luci-app-zerotier=y      # ZeroTier网页管理界面 - 管理ZeroTier虚拟局域网的加入、授权和状态
+CONFIG_PACKAGE_tailscale=n              # Tailscale组网工具 - 与zerotier一样异地组网工具，已使用zerotier，关闭
+CONFIG_PACKAGE_luci-proto-wireguard=n   # WireGuard LuCI - kmod-wireguard已关闭
+CONFIG_PACKAGE_luci-app-frps=n          # Frp内网穿透服务端 - 搭建Frp服务器端
+CONFIG_PACKAGE_luci-app-frpc=n          # Frp内网穿透客户端 - 通过Frp实现内网服务外网访问
+CONFIG_PACKAGE_luci-app-socat=n         # Socat端口转发 - 端口转发/反向代理工具
 
-# 5.4 网络组网 & VPN
-CONFIG_PACKAGE_zerotier=y
-CONFIG_PACKAGE_luci-app-zerotier=y
-CONFIG_PACKAGE_tailscale=n
-CONFIG_PACKAGE_luci-proto-wireguard=n
-CONFIG_PACKAGE_luci-app-frps=n
-CONFIG_PACKAGE_luci-app-frpc=n
-CONFIG_PACKAGE_luci-app-socat=n
+## 5.5 NAS & 文件共享
+CONFIG_PACKAGE_luci-app-samba4=y        # Samba4文件共享 - 局域网内提供文件共享服务的标准组件（SMB协议）
+CONFIG_PACKAGE_luci-app-nfs=n           # NFS共享服务 - Linux/Unix系统间高速文件共享协议，家用环境Samba更通用，关闭
+CONFIG_PACKAGE_luci-app-minidlna=n      # MiniDLNA媒体服务器 - DLNA协议流媒体共享（视频/音乐）
+CONFIG_PACKAGE_luci-app-filemanager=y   # 文件管理器 - 支持文件上传、下载、编辑的Web工具
+CONFIG_PACKAGE_luci-app-filebrowser-go=n # 文件浏览器（Go版） - 轻量级Web文件管理器，已使用filemanager，关闭
+CONFIG_PACKAGE_luci-app-mini-diskmanager=y # 简易磁盘管理 - 辅助硬盘分区、挂载管理
+CONFIG_PACKAGE_luci-app-diskman=n       # 磁盘管理工具 - 管理硬盘分区、RAID和挂载点，已使用mini-diskmanager，关闭
+CONFIG_PACKAGE_luci-app-partexp=n       # 分区扩展工具 - 扩展磁盘分区，家用无需
 
-# 5.5 NAS & 文件共享
-CONFIG_PACKAGE_luci-app-samba4=y
-CONFIG_PACKAGE_luci-app-nfs=n
-CONFIG_PACKAGE_luci-app-minidlna=n
-CONFIG_PACKAGE_luci-app-filemanager=y
-CONFIG_PACKAGE_luci-app-filebrowser-go=n
-CONFIG_PACKAGE_luci-app-mini-diskmanager=y
-CONFIG_PACKAGE_luci-app-diskman=n
-CONFIG_PACKAGE_luci-app-gecoosac=n
-CONFIG_PACKAGE_luci-app-partexp=n
+## 5.6 云盘 & 下载工具
+CONFIG_PACKAGE_luci-app-alist=n         # AList网盘挂载 - 多网盘聚合管理（阿里云盘/OneDrive等）
+CONFIG_PACKAGE_luci-app-rclone=n        # Rclone云存储 - 挂载Google Drive/OneDrive等云盘
+CONFIG_PACKAGE_luci-app-transmission=n  # Transmission下载 - 集成Transmission的BT下载工具
+CONFIG_PACKAGE_luci-app-aria2=n         # Aria2下载器 - 支持HTTP/BT/Magnet的多线程下载工具
 
-# 5.6 云盘 & 下载工具
-CONFIG_PACKAGE_luci-app-alist=y
-CONFIG_PACKAGE_luci-app-rclone=n
-CONFIG_PACKAGE_luci-app-transmission=n
-CONFIG_PACKAGE_luci-app-aria2=n
+## 5.7 网络 & 防火墙
+CONFIG_PACKAGE_luci-app-upnp=n          # UPnP端口映射 - 自动为游戏/P2P应用配置端口转发
+CONFIG_PACKAGE_luci-app-arpbind=n       # ARP绑定 - 防止ARP欺骗攻击（绑定IP与MAC）
+CONFIG_PACKAGE_luci-app-banip=n         # IP封禁工具 - 动态封禁恶意IP地址（ip黑名单）
+CONFIG_PACKAGE_luci-app-eqos=n          # 平等QoS管理 - 按IP/端口分配带宽优先级
+CONFIG_PACKAGE_luci-app-nft-qos=n       # NFTables QoS - 基于nftables的流量控制
+CONFIG_PACKAGE_luci-app-sqm=n           # SQM QoS网页管理界面 - 依赖sqm-scripts核心，因NSS版支持不完整故一同关闭
+CONFIG_PACKAGE_sqm-scripts-nss=n        # SQM QoS(NSS硬件加速版) - 高通平台提升QoS性能，支持不完整，可能导致问题，建议关闭
+CONFIG_PACKAGE_luci-app-oaf=n           # 应用流量过滤 - 按应用类型（游戏/视频）限制带宽
+CONFIG_PACKAGE_luci-app-gecoosac=n      # 集客无线AC控制器 - 统一管理集客无线AP，支持KVR快速漫游，家用无需求，关闭
+CONFIG_PACKAGE_luci-app-unblockneteasemusic=y # 解锁网易云音乐 - 绕过网易云音乐地域限制
 
-# 5.7 网络 & 防火墙
-CONFIG_PACKAGE_luci-app-upnp=y
-CONFIG_PACKAGE_luci-app-arpbind=n
-CONFIG_PACKAGE_luci-app-banip=n
-CONFIG_PACKAGE_luci-app-eqos=y
-CONFIG_PACKAGE_luci-app-nft-qos=n
-CONFIG_PACKAGE_luci-app-sqm=n
-CONFIG_PACKAGE_sqm-scripts-nss=n
-CONFIG_PACKAGE_luci-app-oaf=n
+## 5.8 系统监控 & 诊断
+CONFIG_PACKAGE_luci-app-netdata=n       # Netdata性能监控 - 实时系统性能监控仪表盘
+CONFIG_PACKAGE_luci-app-vnstat2=n       # VnStat流量统计 - 监控网络流量使用情况（新版）
+CONFIG_PACKAGE_luci-app-watchcat=n      # 看门狗监控 - 检测网络故障并自动重启
 
-CONFIG_PACKAGE_luci-app-unblockneteasemusic=y
+## 5.9 系统维护 & 管理
+CONFIG_PACKAGE_luci-app-hd-idle=y       # 硬盘休眠工具 - 设置硬盘自动休眠以节能
+CONFIG_PACKAGE_luci-app-wolplus=n       # 增强版网络唤醒 - 增强版WOL，远程开机局域网设备
+CONFIG_PACKAGE_luci-app-wol=n           # 网络唤醒工具 - 通过局域网唤醒设备（WOL），已使用wolplus，关闭
+CONFIG_PACKAGE_luci-app-autoreboot=y    # 定时重启 - 设置计划任务定时重启路由器
+CONFIG_PACKAGE_luci-app-ttyd=y          # TTYD网页终端 - 通过浏览器访问路由器的命令行界面
+CONFIG_PACKAGE_luci-app-commands=n      # 自定义命令 - 在Web界面直接执行Shell命令
+CONFIG_PACKAGE_luci-app-attendedsysupgrade=n # 系统自动升级 - 检测并安装OpenWrt固件更新
+CONFIG_PACKAGE_luci-app-uhttpd=n        # uHTTPd Web服务器 - OpenWrt默认的轻量级Web服务器
+CONFIG_PACKAGE_luci-app-3cat=n          # 3CAT工具 - 基于3proxy代理的简单端口转发工具
+CONFIG_PACKAGE_luci-app-package-manager=n # 软件包管理 - 图形化安装/卸载OpenWrt插件
 
-# 5.8 系统监控 & 诊断
-CONFIG_PACKAGE_luci-app-netdata=n
-CONFIG_PACKAGE_luci-app-vnstat2=y
-CONFIG_PACKAGE_luci-app-watchcat=n
+## 5.10 Docker & 容器
+CONFIG_PACKAGE_dockerd=n                # Docker守护进程 - 容器运行核心
+CONFIG_PACKAGE_docker=n                 # Docker CLI - 命令行工具
+CONFIG_PACKAGE_luci-app-dockerman=n     # Docker图形管理 - 增强版Docker Web管理界面
 
-# 5.9 系统维护 & 管理
-CONFIG_PACKAGE_luci-app-hd-idle=y
-CONFIG_PACKAGE_luci-app-wolplus=y
-CONFIG_PACKAGE_luci-app-wol=n
-CONFIG_PACKAGE_luci-app-autoreboot=y
-CONFIG_PACKAGE_luci-app-ttyd=y
-CONFIG_PACKAGE_luci-app-commands=y
-CONFIG_PACKAGE_luci-app-attendedsysupgrade=n
-CONFIG_PACKAGE_luci-app-uhttpd=n
-CONFIG_PACKAGE_luci-app-3cat=n
-CONFIG_PACKAGE_luci-app-package-manager=y
+## 5.11 推送通知
+CONFIG_PACKAGE_luci-app-wechatpush=n    # 微信推送通知 - 通过Server酱等发送路由器状态到微信
 
-# 5.10 Docker & 容器
-CONFIG_PACKAGE_dockerd=n
-CONFIG_PACKAGE_docker=n
-CONFIG_PACKAGE_luci-app-dockerman=n
+## 5.12 其他工具
+CONFIG_PACKAGE_luci-app-vlmcsd=n        # KMS激活服务器 - 搭建Windows/Office KMS激活服务器
+CONFIG_PACKAGE_luci-app-usb-printer=n   # USB打印机共享 - 将USB打印机转为网络打印机
+CONFIG_PACKAGE_luci-app-wifischedule=n  # WiFi定时开关 - 按计划启用/禁用无线网络
 
-# 5.11 推送通知
-CONFIG_PACKAGE_luci-app-wechatpush=y
-
-# 5.12 其他工具
-CONFIG_PACKAGE_luci-app-vlmcsd=n
-CONFIG_PACKAGE_luci-app-usb-printer=n
-CONFIG_PACKAGE_luci-app-wifischedule=n
-
-# 5.13 主题美化
-CONFIG_PACKAGE_luci-theme-argon=y
-CONFIG_PACKAGE_luci-app-argon-config=y
-CONFIG_PACKAGE_luci-theme-aurora=y
-CONFIG_PACKAGE_luci-app-aurora-config=y
+## 5.13 主题美化
+CONFIG_PACKAGE_luci-theme-argon=y       # Argon主题 - 主流美化主题
+CONFIG_PACKAGE_luci-app-argon-config=n  # Argon主题配置 - 管理OpenWrt的Argon主题界面
+CONFIG_PACKAGE_luci-theme-aurora=y      # Aurora主题 - 美化主题
+CONFIG_PACKAGE_luci-app-aurora-config=n # Aurora主题配置 - 自定义壁纸/色彩
